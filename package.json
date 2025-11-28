@@ -1,0 +1,15 @@
+{
+  "name": "estimator-admin",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+   "server:install": "cd server && yarn && cd..",
+   "client:install": "cd client && yarn && cd..",
+   "build:server": "cd server && yarn build && cd..",
+   "build:client": "cd client && yarn build && cd..",
+   "prebuild": "yarn server:install && yarn client:install",
+   "build": "yarn build:server && yarn build:client",
+   "start": "cd server && yarn start:prod"
+  }
+}
