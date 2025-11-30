@@ -52,10 +52,17 @@ export class Client {
   address: string;
 
   @Prop({
-    required: true,
+    required: false,
     select: false, // Exclude password by default in queries
   })
-  password: string;
+  password?: string;
+
+  @Prop({
+    required: false,
+    unique: true,
+    sparse: true, // Allow null values while maintaining uniqueness
+  })
+  googleId?: string;
 
   @Prop({
     required: false,
@@ -72,7 +79,7 @@ export const ClientSchema = SchemaFactory.createForClass(Client);
 
 // Hash password before saving
 ClientSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
+  if (!this.password || !this.isModified('password')) {
     return next();
   }
 

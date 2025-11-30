@@ -9,9 +9,11 @@ import {
   Typography,
   Alert,
   CircularProgress,
+  Divider,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import { GoogleLogin } from '@react-oauth/google';
 import RegistrationForm from '../components/RegistrationForm';
 import apiService from '../services/api';
 import authService from '../services/auth';
@@ -63,6 +65,39 @@ export default function LoginPage() {
       navigate('/home');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async (credentialResponse: any) => {
+    setError('');
+    setLoading(true);
+
+    try {
+      // Send the Google token to backend
+      const response = await apiService.verifyGoogleToken(credentialResponse.credential);
+
+      // Save token and user info
+      authService.saveToken(response.access_token);
+      authService.saveUser(response.user);
+
+      // Store in context
+      const fullUserData = {
+        id: response.user.id,
+        email: response.user.email,
+        firstName: response.user.firstName,
+        lastName: response.user.lastName,
+        // stampUrl: response.user.stampUrl || '',
+        // logoUrl: response.user.logoUrl || '',
+      };
+
+      setUser(fullUserData);
+
+      // Navigate to home page
+      navigate('/home');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Google login failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -221,6 +256,19 @@ export default function LoginPage() {
                 'Sign In'
               )}
             </Button>
+          </Box>
+
+          {/* Divider */}
+          <Divider sx={{ my: 1 }}>OR</Divider>
+
+          {/* Google Login */}
+          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            {!loading && (
+              <GoogleLogin
+                onSuccess={handleGoogleLogin}
+                onError={() => setError('Google login failed. Please try again.')}
+              />
+            )}
           </Box>
 
           {/* Registration Link */}

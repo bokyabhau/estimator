@@ -100,6 +100,16 @@ class ApiService {
   }
 
   /**
+   * Verify Google token and login user
+   */
+  async verifyGoogleToken(token: string): Promise<LoginResponse> {
+    return this.request('/auth/google/verify', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    });
+  }
+
+  /**
    * Get all clients
    */
   async getAllClients(): Promise<ApiResponse<any>> {

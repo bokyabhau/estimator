@@ -65,6 +65,41 @@ export class ClientService {
     return await this.clientModel.findOne({ email }).select('+password').exec();
   }
 
+  async findByGoogleId(googleId: string): Promise<Client | null> {
+    return await this.clientModel.findOne({ googleId }).exec();
+  }
+
+  async createFromGoogle(googleData: {
+    googleId: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    phoneNumber: string;
+    address: string;
+  }): Promise<Client> {
+    try {
+      // Check if user already exists by email
+      const existingClient = await this.clientModel.findOne({ email: googleData.email });
+      
+      if (existingClient) {
+        // Update with googleId if not already set
+        if (!existingClient.googleId) {
+          existingClient.googleId = googleData.googleId;
+          await existingClient.save();
+        }
+        return existingClient;
+      }
+
+      const newClient = new this.clientModel(googleData);
+      return await newClient.save();
+    } catch (error) {
+      if (error.code === 11000) {
+        throw new ConflictException('Email already exists');
+      }
+      throw error;
+    }
+  }
+
   async update(
     id: string,
     updateClientDto: UpdateClientDto,
